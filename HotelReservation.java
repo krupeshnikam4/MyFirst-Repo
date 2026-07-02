@@ -1,0 +1,253 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+class HotelReservation {
+    public static void main(String[] args) {
+        Hotel hotel = new Hotel("Luxury View");
+        hotel.initializeRooms();
+        hotel.run();
+    }
+}
+
+class Room {
+    private final int number;//for fix value
+    private final String type;
+    private final double pricePerNight;
+    private boolean reserved;
+
+    Room(int number, String type, double pricePerNight) {
+        this.number = number;
+        this.type = type;
+        this.pricePerNight = pricePerNight;
+        this.reserved = false;
+    }
+
+    int getNumber() {
+        return number;
+    }
+
+    String getType() {
+        return type;
+    }
+
+    double getPricePerNight() {
+        return pricePerNight;
+    }
+
+    boolean isReserved() {
+        return reserved;
+    }
+
+    void reserve() {
+        reserved = true;
+    }
+
+    void cancel() {
+        reserved = false;
+    }
+
+ @Override
+    public String toString() {
+        return String.format("Room %d - %s - %.2f / night - %s",
+                number, type, pricePerNight, reserved ? "Reserved" : "Available");
+    }
+}
+
+class Reservation {
+    private static int nextId = 1001;
+    private final int id;
+    private final String guestName;
+    private final Room room;
+    private final int nights;
+
+    Reservation(String guestName, Room room, int nights) {
+        this.id = nextId++;
+        this.guestName = guestName;
+        this.room = room;
+        this.nights = nights;
+    }
+
+    int getId() {
+        return id;
+    }
+
+    String getGuestName() {
+        return guestName;
+    }
+
+    Room getRoom() {
+        return room;
+    }
+
+    int getNights() {
+        return nights;
+    }
+
+    double getTotalCost() {
+        return room.getPricePerNight() * nights;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Reservation #%d: %s | Room %d (%s) | %d nights | Total ₹%.2f",
+                id, guestName, room.getNumber(), room.getType(), nights, getTotalCost());
+    }
+}
+
+class Hotel {
+    private final String name;
+    private final List<Room> rooms = new ArrayList<>();
+    private final List<Reservation> reservations = new ArrayList<>();
+    private final Scanner scanner = new Scanner(System.in);
+
+    Hotel(String name) {
+        this.name = name;
+    }
+
+    void initializeRooms() {
+        rooms.add(new Room(101, "Single", 150.00));
+        rooms.add(new Room(102, "Single", 150.00));
+        rooms.add(new Room(103, "Single", 150.00));
+        rooms.add(new Room(104, "Double", 250.00));
+        rooms.add(new Room(105, "Double", 250.00));
+        rooms.add(new Room(106, "Double", 250.00));
+    }
+
+    void run() {
+        boolean running = true;
+        while (running) {
+            printHeader();
+            printMenu();
+            switch (readInt("Choose an option: ", 1, 5)) {
+                case 1 -> showAvailableRooms();
+                case 2 -> makeReservation();
+                case 3 -> cancelReservation();
+                case 4 -> showReservations();
+                case 5 -> {
+                    System.out.println("Thank you for using " + name + " reservation system.");
+                    running = false;
+                }
+                default -> System.out.println("Invalid option. Please try again.");
+            }
+            System.out.println();
+        }
+        scanner.close();
+    }
+
+    private void printHeader() {
+        System.out.println("=================================");
+        System.out.println("  " + name + " Reservation System");
+        System.out.println("=================================");
+    }
+
+    private void printMenu() {
+        System.out.println("1. View available rooms");
+        System.out.println("2. Make a reservation");
+        System.out.println("3. Cancel a reservation");
+        System.out.println("4. View reservations");
+        System.out.println("5. Exit");
+    }
+
+    private void showAvailableRooms() {
+        System.out.println("Available rooms:");
+        boolean found = false;
+        for (Room room : rooms) {
+            if (!room.isReserved()) {
+                System.out.println(room);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No rooms are available at the moment.");
+        }
+    }
+
+    private void makeReservation() {
+        showAvailableRooms();
+        int roomNumber = readInt("Enter room number to reserve: ", Integer.MIN_VALUE, Integer.MAX_VALUE);
+        Room room = findRoom(roomNumber);
+        if (room == null) {
+            System.out.println("Room number " + roomNumber + " does not exist.");
+            return;
+        }
+        if (room.isReserved()) {
+            System.out.println("Room " + roomNumber + " is already reserved.");
+            return;
+        }
+
+        System.out.print("Guest name: ");
+        String guestName = scanner.nextLine().trim();
+        if (guestName.isEmpty()) {
+            System.out.println("Guest name cannot be empty.");
+            return;
+        }
+        int nights = readInt("Number of nights: ", 1, 30);
+        room.reserve();
+        Reservation reservation = new Reservation(guestName, room, nights);
+        reservations.add(reservation);
+        System.out.println("Reservation created successfully: " + reservation);
+    }
+
+    private void cancelReservation() {
+        if (reservations.isEmpty()) {
+            System.out.println("No reservations exist to cancel.");
+            return;
+        }
+
+        int reservationId = readInt("Enter reservation ID to cancel: ", Integer.MIN_VALUE, Integer.MAX_VALUE);
+        Reservation reservation = findReservation(reservationId);
+        if (reservation == null) {
+            System.out.println("No reservation found with ID " + reservationId + ".");
+            return;
+        }
+
+        reservation.getRoom().cancel();
+        reservations.remove(reservation);
+        System.out.println("Reservation " + reservationId + " has been canceled.");
+    }
+
+    private void showReservations() {
+        if (reservations.isEmpty()) {
+            System.out.println("No reservations have been made yet.");
+            return;
+        }
+        System.out.println("Current reservations:");
+        for (Reservation reservation : reservations) {
+            System.out.println(reservation);
+        }
+    }
+
+    private Room findRoom(int number) {
+        for (Room room : rooms) {
+            if (room.getNumber() == number) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    private Reservation findReservation(int id) {
+        for (Reservation reservation : reservations) {
+            if (reservation.getId() == id) {
+                return reservation;
+            }
+        }
+        return null;
+    }
+
+    private int readInt(String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                int value = Integer.parseInt(scanner.nextLine().trim());
+                if (value < min || value > max) {
+                    System.out.println("Please enter a value between " + min + " and " + max + ".");
+                    continue;
+                }
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number. Please try again.");
+            }
+        }
+    }
+}

@@ -1,0 +1,63 @@
+import java.util.Scanner;
+class StockTrading{
+    public static void main(String []args){
+        Scanner sc = new Scanner(System.in);
+        System.out.println();
+        System.out.println("---Welcome to Stock Trading Platform---");
+        System.out.println();
+        System.out.print("Enter a user ID: ");
+        Float ID= sc.nextFloat();
+        System.out.print("Enter the Initial Balance: ");
+        double initialBalance = sc.nextInt();
+        System.out.print("Enter Value of each Stock: ");
+        double ValueOfStock = sc.nextDouble();
+        System.out.print("Buy a Stock: ");
+        double Stock = sc.nextDouble();
+        System.out.print("Buying Stock Prices: ");
+        double BuyingCost = Stock*ValueOfStock;
+        System.out.println(BuyingCost);
+        double RemainingBalance= initialBalance-BuyingCost;
+        System.out.println("Remaining Balance is : "+RemainingBalance);
+        //available stock 
+        System.out.print("Share a Stock: ");
+        Float ShareStock =sc.nextFloat();
+        if (Stock>=ShareStock) {
+             System.out.print("New Share Price is: ");
+        double newShareStock =sc.nextDouble();
+double newcost = ShareStock*newShareStock;
+System.out.println("Stock is Share: "+newcost);
+System.out.println();
+   
+double newBalance= newcost+RemainingBalance;
+System.out.println("After Share Stock new Balance is: "+newBalance);   
+System.out.println();
+    
+System.out.println("---Check History---");
+System.out.println();
+System.out.println("Initial balance: "+initialBalance);
+System.out.println("Buying cost: "+BuyingCost);
+System.out.println("Remaining Balance: "+RemainingBalance);
+System.out.println("NewShareStock price: "+newShareStock);
+System.out.println("New Cost: "+newcost);
+System.out.println("New Balance: "+newBalance);
+System.out.println();
+if(BuyingCost<newcost){
+System.out.println("--Stock Holder have a Profit--");
+System.out.println();
+double ProfitCost= newBalance-initialBalance;
+System.out.println("Profit Cost: "+ProfitCost);
+}else{
+    System.out.println("--Stock Holder is in Losss--");
+    System.out.println();
+    double LossCost =initialBalance-newBalance;
+    System.out.println("Loss Cost: "+LossCost);
+}
+System.out.println();
+sc.close();
+        }else{
+System.out.println("No Stock Avalible ");
+sc.close();
+        }
+       
+    }
+}
